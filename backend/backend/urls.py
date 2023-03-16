@@ -22,7 +22,6 @@ urlpatterns = [
     # custom api endpoints
     path('api/products/',include('base.urls.product_urls')),
     path('api/users/',include('base.urls.user_urls')),
-    path('api/orders/',include('base.urls.order_urls')),
     path('api/customer_orders/',include('base.urls.customer_order_urls')),
     path('api/colors/',include('base.urls.color_urls')),
     path('api/sizes/',include('base.urls.size_urls')),

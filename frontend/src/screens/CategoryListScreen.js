@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { LinkContainer } from 'react-router-bootstrap'
-import {useNavigate } from 'react-router-dom'
+import {useNavigate,Link } from 'react-router-dom'
 import { Table, Button, Row,Col} from 'react-bootstrap' 
 
 import { useDispatch, useSelector } from 'react-redux'
@@ -62,6 +62,9 @@ function CategoryListScreen() {
     }
     return (
         <div>
+            <Link to='/' className='btn btn-light my-3'>
+            Go Back
+            </Link>
            <Row className='align-items-center'>
                 <Col md={10}>
                     <h1>Categories</h1>
@@ -91,7 +94,8 @@ function CategoryListScreen() {
                                         
                                 </tr>
                             </thead>
-
+                            {categories.length > 0 ? 
+                              (  
                             <tbody>
                                 {categories.map(category => (
                                     <tr key={category.id}>
@@ -114,6 +118,11 @@ function CategoryListScreen() {
                                     </tr>
                                 ))}
                             </tbody>
+                              ):(
+                                <Message variant='info'>
+                                    Categories are empty
+                                </Message>
+                              )}
                         </Table>
                     )}
         </div>

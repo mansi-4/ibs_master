@@ -167,3 +167,33 @@ def getCustomerOrderById(request,pk):
             return Response("you're not an admin")
     else: 
         return Response("Authorization Token not provided")
+    
+@api_view(["POST"])
+def InvoiceCreation(request):
+    config = pdfkit.configuration(wkhtmltopdf = r"C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe")  
+    data=JSONParser().parse(request) 
+    pdf_header="""<html>
+                <head>
+                <title>Offline2Online</title>
+                <meta charset="utf-8">
+                <!-- Latest compiled and minified CSS -->
+                <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/css/bootstrap.min.css">
+
+                <!-- jQuery library -->
+                <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.slim.min.js"></script>
+
+                <!-- Popper JS -->
+                <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+
+                <!-- Latest compiled JavaScript -->
+                <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.1/dist/js/bootstrap.bundle.min.js"></script>
+                </head>
+                <body>"""
+    pdf_footer="</body></html>"
+    Pdfheader=pdf_header 
+    Pdffooter=pdf_footer 
+    final=Pdfheader+data+Pdffooter 
+    output= pdfkit.from_string(final,output_path=False,configuration=config) 
+    response = HttpResponse(content_type="application/pdf") 
+    response.write(output) 
+    return response

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import { Link ,useNavigate,useSearchParams,useParams} from 'react-router-dom'
 import { Form, Button } from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
@@ -10,7 +9,7 @@ import { listColorDetails, updateColor } from '../actions/colorActions'
 import { COLOR_UPDATE_RESET } from '../constants/colorConstants'
 import {logout} from '../actions/userAction'
 import jwt_decode from "jwt-decode";
-
+ 
 function ColorEditScreen() {
     let history=useNavigate()
     const { productId } = useParams();

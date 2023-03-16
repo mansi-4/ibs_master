@@ -4,7 +4,6 @@ import {Container,Navbar,Nav, NavDropdown,Image} from 'react-bootstrap'
 import {LinkContainer} from 'react-router-bootstrap'
 import {  } from 'react-router-dom'
 import {logout} from '../actions/userAction'
-import SearchBox from './SearchBox'
 function Header() {
   const dispatch=useDispatch()
   const userLogin = useSelector(state => state.userLogin)
@@ -17,9 +16,8 @@ function Header() {
   <Navbar bg="dark" variant="dark" expand="lg" collapseOnSelect>
     <Container fluid>
         <LinkContainer to="/">
-          {/* <Navbar.Brand>ProShop</Navbar.Brand> */}
           <Navbar.Brand> 
-          Offline2online
+          Offlinetoonline
           </Navbar.Brand>
 
         </LinkContainer>
@@ -30,10 +28,7 @@ function Header() {
           <Nav
               className="ms-auto"
           >
-          <LinkContainer to="/cart">
-            <Nav.Link><i className='fas fa-shopping-cart'></i>Cart</Nav.Link>
-          </LinkContainer>
-
+   
           {userInfo?(
             <NavDropdown title={userInfo.name} id="username">
               <LinkContainer to="/profile">

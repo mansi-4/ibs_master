@@ -4,6 +4,7 @@ from base.views import user_views as views
   
 urlpatterns = [
    path("",views.getUsers,name="all-Users"),
+   path("table_counts",views.getCount,name="getTableCounts"),
    path("register",views.registerUser,name="add-User"),
    path("login",views.loginUser,name="login-User"), 
    path("verify_user",views.verifyUser,name="verify-User"), 
@@ -14,5 +15,4 @@ urlpatterns = [
    path("update/<str:pk>/",views.updateUser,name="update-User"),
    path("delete/<str:pk>/",views.deleteUser,name="delete-User"),
    path("<str:pk>",views.getUserById,name="User-by-id"),
-   
-]
+   ]

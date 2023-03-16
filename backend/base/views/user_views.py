@@ -7,6 +7,7 @@ from base.models import Users
 from django.contrib.auth.hashers import make_password, check_password
 import jwt, datetime
 from django.core.mail import send_mail
+from base.models import Product,Users,Category,Color,Size,CustomerOrder
 from django.conf import settings
 # Create your views here.
 @api_view(['GET'])
@@ -191,13 +192,13 @@ def registerUser(request):
                 subject='User Activation Link',
                 message=f'''
                     Hi, {user.name}  \n
-                    your Offline2Online account is almost ready.\n 
+                    your OfflineToOnline account is almost ready.\n 
                     To activate your account please Click the following link.\n
                     http://localhost:3000/user_activation/{token} \n 
                     Please note that this activation link is valid only upto 1 hour. \n
                     After you activate your account, you will be able to login.\n 
                     Thanks & Regards, 
-                    Offline2Online Team.
+                    OfflineToOnline Team.
 
                 ''',
                 from_email=settings.EMAIL_HOST_USER,
@@ -222,7 +223,7 @@ def verifyUser(request):
         
         payload = {
             'id': user.id,
-            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=5),
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(minutes=10),
             'iat': datetime.datetime.utcnow()
         }
 
@@ -232,12 +233,13 @@ def verifyUser(request):
                 subject='Password Reset Link',
                 message=f'''
                     Hi, \n 
-                    You recently requested to reset the password for your Offline2Online account.\n 
+                    You recently requested to reset the password for your OfflineToOnline account.\n 
                     Click the link below to proceed.\n
                     http://localhost:3000/reset_password/{token} \n 
+                    Please note that this activation link is valid only upto 10 minutes. \n
                     If you did not request a password reset, please ignore this email or reply to let us know.\n 
                     Thanks & Regards, 
-                    Offline2Online Team.
+                    OfflineToOnline Team.
                 ''',
                 from_email=settings.EMAIL_HOST_USER,
                 recipient_list=[email],
@@ -336,3 +338,33 @@ def deleteUser(request,pk):
     else:
         return Response("Authorization Token not provided")
     
+@api_view(['GET'])
+def getCount(request):
+    if 'Authorization' in request.headers:
+        token=request.headers['Authorization']
+        if not token:
+            raise AuthenticationFailed('Unauthenticated!')
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Token has Expired!')
+        except jwt.InvalidSignatureError:
+            raise AuthenticationFailed("Invalid Token")
+        except:
+            raise AuthenticationFailed("Something went wrong")
+        user = Users.objects.filter(id=payload['id']).first()
+        if(user.is_superuser):
+            user_count = Users.objects.filter(status=0).count()
+            color_count = Color.objects.filter(status=0).count()
+            size_count = Size.objects.filter(status=0).count()
+            category_count = Category.objects.filter(status=0).count()
+            product_count = Product.objects.filter(status=0).count()
+            order_count = CustomerOrder.objects.filter(status=0).count()
+            
+            data = {"usercount": user_count,"colorcount": color_count,"sizecount": size_count,
+                            "categorycount": category_count,"productcount": product_count,"ordercount": order_count}
+            return Response(data)
+        else:
+            return Response("You are not an admin")
+    else:
+        return Response("Authorization Token not provided")

@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate ,Link} from 'react-router-dom'
 import { LinkContainer } from 'react-router-bootstrap'
 import { Table, Button ,Row,Col} from 'react-bootstrap'
 import { useDispatch, useSelector } from 'react-redux'
 import Loader from '../components/Loader'
 import Message from '../components/Message'
-import { listCustomerOrders, listOrders } from '../actions/orderActions'
+import { listCustomerOrders} from '../actions/orderActions'
 import {logout} from "../actions/userAction"
 import jwt_decode from "jwt-decode";
  
@@ -13,9 +13,7 @@ function OrderListScreen() {
     let history=useNavigate();
     const dispatch = useDispatch()
 
-    const orderList = useSelector(state => state.orderList)
-    const { loading, error, orders } = orderList
-
+    
     const userLogin = useSelector(state => state.userLogin)
     const { userInfo } = userLogin
     
@@ -30,7 +28,6 @@ function OrderListScreen() {
             if(decodedHeader.exp*1000 < Date.now()){
                 dispatch(logout())
             }else{
-                dispatch(listOrders())
                 dispatch(listCustomerOrders())
             }
         }
@@ -47,6 +44,9 @@ function OrderListScreen() {
     }
     return (
         <div>
+            <Link to='/' className='btn btn-light my-3'>
+            Go Back
+            </Link>
             <Row className='align-items-center'> 
                 <Col md={10}>
                     <h1>Orders</h1>
@@ -59,8 +59,6 @@ function OrderListScreen() {
                 </Col>
             </Row>
             
-            <h3>Offline Orders</h3>
-
             {loadingCustomerList
                 ? (<Loader />)
                 : errorCustomerList
@@ -109,7 +107,7 @@ function OrderListScreen() {
                             </tbody>
                             ):(
                                 <Message variant='info'>
-                                    Order is empty
+                                    Orders are empty
                                 </Message>
                                 )}
                         </Table>
@@ -118,4 +116,4 @@ function OrderListScreen() {
     )
 }
 
-export default OrderListScreen
+export default OrderListScreen 

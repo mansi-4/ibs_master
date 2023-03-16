@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.exceptions import AuthenticationFailed
 import jwt
 import json
-from base.models import Product,Review,Users,Category,ProductVariations,Color,Size
+from base.models import Product,Users,Category,ProductVariations,Color,Size
 from base.helper.ImageWork import handleuploadfile
 # from base.serializers import ProductSerializer
 from django_filters.rest_framework import DjangoFilterBackend
@@ -18,10 +18,9 @@ def getProducts(request):
     
     category_id=request.query_params.get("category_id")
     if category_id != "0":
-        products=Product.objects.filter(name__icontains=query,category=category_id,status=0).prefetch_related('review_set').prefetch_related('productvariations_set').select_related('category').select_related('user')
+        products=Product.objects.filter(name__icontains=query,category=category_id,status=0).prefetch_related('productvariations_set').select_related('category').select_related('user')
     else:
-        print("else")
-        products=Product.objects.filter(name__icontains=query,status=0).prefetch_related('review_set').prefetch_related('productvariations_set').select_related('category').select_related('user').all()
+        products=Product.objects.filter(name__icontains=query,status=0).prefetch_related('productvariations_set').select_related('category').select_related('user').all()
     
     serialized_products=[]
     for p in products:
@@ -31,24 +30,19 @@ def getProducts(request):
             split_images_list=product_images.split(",")
             for s in split_images_list:
                 serialized_images.append("static/multimedia/"+str(s))
-        serialized_reviews=[]
         serialized_product_variations=[]
-        reviews=p.review_set.all()
         product_variations=p.productvariations_set.all()
-        for r in reviews:
-            rt={"review_id":r._id,"name":r.name,"rating":r.rating,"comment":r.comment,"createdAt":r.createdAt,"product":r.product_id,"user":r.user_id}
-            serialized_reviews.append(rt)
         for pr in product_variations:
             pv={"product_variation_id":pr.id,"color_id":pr.color.id,"color":pr.color.color,"size_id":pr.size.id,"size":pr.size.size,"price":pr.price,"countInStock":pr.countInStock}
             serialized_product_variations.append(pv)
-        st={"product_id":p._id,"name":p.name,"brand":p.brand,"category_id":p.category.id,"category":p.category.category,"description":p.description,"rating":p.rating,"num_reviews":p.numReviews,"createdAt":p.createdAt,"user_id":p.user.id,"user_name":p.user.name,"images":serialized_images,"variations":serialized_product_variations,"reviews":serialized_reviews}
+        st={"product_id":p._id,"name":p.name,"brand":p.brand,"category_id":p.category.id,"category":p.category.category,"description":p.description,"rating":p.rating,"num_reviews":p.numReviews,"createdAt":p.createdAt,"user_id":p.user.id,"user_name":p.user.name,"images":serialized_images,"variations":serialized_product_variations}
         serialized_products.append(st)
     return Response(serialized_products)
 
 
 @api_view(['GET'])
 def getTopProducts(request):
-    products = Product.objects.filter(rating__gte=3,status=0).order_by('-rating')[0:5].prefetch_related('review_set').prefetch_related('productvariations_set').select_related('category').select_related('user')
+    products = Product.objects.filter(rating__gte=3,status=0).order_by('-rating')[0:5].prefetch_related('productvariations_set').select_related('category').select_related('user')
     serialized_products=[]
     for p in products:
         product_images=p.image
@@ -57,41 +51,31 @@ def getTopProducts(request):
             split_images_list=product_images.split(",")
             for s in split_images_list:
                 serialized_images.append("static/multimedia/"+str(s))
-        serialized_reviews=[]
         serialized_product_variations=[]
-        reviews=p.review_set.all()
         product_variations=p.productvariations_set.all()
-        for r in reviews:
-            rt={"review_id":r._id,"name":r.name,"rating":r.rating,"comment":r.comment,"createdAt":r.createdAt,"product":r.product_id,"user":r.user_id}
-            serialized_reviews.append(rt)
         for pp in product_variations:
             pv={"product_variation_id":pp.id,"color_id":pp.color.id,"color":pp.color.color,"size_id":pp.size.id,"size":pp.size.size,"price":pp.price,"countInStock":pp.countInStock}
             serialized_product_variations.append(pv)
-        st={"product_id":p._id,"name":p.name,"brand":p.brand,"category_id":p.category.id,"category":p.category.category,"description":p.description,"rating":p.rating,"num_reviews":p.numReviews,"createdAt":p.createdAt,"user_id":p.user.id,"user_name":p.user.name,"images":serialized_images,"variations":serialized_product_variations,"reviews":serialized_reviews}
+        st={"product_id":p._id,"name":p.name,"brand":p.brand,"category_id":p.category.id,"category":p.category.category,"description":p.description,"rating":p.rating,"num_reviews":p.numReviews,"createdAt":p.createdAt,"user_id":p.user.id,"user_name":p.user.name,"images":serialized_images,"variations":serialized_product_variations}
         serialized_products.append(st)
     return Response(serialized_products)
 
 @api_view(["GET"])
 def getProduct(request,pk):
     try:
-        product=Product.objects.prefetch_related('review_set').prefetch_related('productvariations_set').select_related('category').select_related('user').filter(status=0).get(_id=pk)
+        product=Product.objects.prefetch_related('productvariations_set').select_related('category').select_related('user').filter(status=0).get(_id=pk)
         product_images=product.image
         serialized_images=[]
         if product_images!=None:
             split_images_list=product_images.split(",")
             for s in split_images_list:
                 serialized_images.append("static/multimedia/"+str(s))
-        serialized_reviews=[]
         serialized_product_variations=[]
-        reviews=product.review_set.all()
         product_variations=product.productvariations_set.all()
-        for r in reviews:
-            rt={"review_id":r._id,"name":r.name,"rating":r.rating,"comment":r.comment,"createdAt":r.createdAt,"product":r.product_id,"user":r.user_id}
-            serialized_reviews.append(rt)
         for p in product_variations:
             pv={"product_variation_id":p.id,"color_id":p.color.id,"color":p.color.color,"size_id":p.size.id,"size":p.size.size,"price":p.price,"countInStock":p.countInStock}
             serialized_product_variations.append(pv)
-        serialized_product={"product_id":product._id,"name":product.name,"brand":product.brand,"category_id":product.category.id,"category":product.category.category,"description":product.description,"rating":product.rating,"num_reviews":product.numReviews,"createdAt":product.createdAt,"user_id":product.user.id,"user_name":product.user.name,"images":serialized_images,"variations":serialized_product_variations,"reviews":serialized_reviews}
+        serialized_product={"product_id":product._id,"name":product.name,"brand":product.brand,"category_id":product.category.id,"category":product.category.category,"description":product.description,"rating":product.rating,"num_reviews":product.numReviews,"createdAt":product.createdAt,"user_id":product.user.id,"user_name":product.user.name,"images":serialized_images,"variations":serialized_product_variations}
         return Response(serialized_product)
     except:
         return Response({})
@@ -99,24 +83,19 @@ def getProduct(request,pk):
 @api_view(["GET"])
 def getProductByDistinctColor(request,pk):
     try:
-        product=Product.objects.prefetch_related('review_set').prefetch_related('productvariations_set').select_related('category').select_related('user').filter(status=0).get(_id=pk)
+        product=Product.objects.prefetch_related('productvariations_set').select_related('category').select_related('user').filter(status=0).get(_id=pk)
         product_images=product.image
         serialized_images=[]
         if product_images!=None:
             split_images_list=product_images.split(",")
             for s in split_images_list:
                 serialized_images.append("static/multimedia/"+str(s))
-        serialized_reviews=[]
         serialized_product_colors=[]
-        reviews=product.review_set.all()
         product_colors=ProductVariations.objects.filter(product=product).values("color__id","color__color").distinct()
-        for r in reviews:
-            rt={"review_id":r._id,"name":r.name,"rating":r.rating,"comment":r.comment,"createdAt":r.createdAt,"product":r.product_id,"user":r.user_id}
-            serialized_reviews.append(rt)
         for p in product_colors:
             pv={"color_id":p["color__id"],"color":p["color__color"]}
             serialized_product_colors.append(pv)
-        serialized_product={"product_id":product._id,"name":product.name,"brand":product.brand,"category_id":product.category.id,"category":product.category.category,"description":product.description,"rating":product.rating,"num_reviews":product.numReviews,"createdAt":product.createdAt,"user_id":product.user.id,"user_name":product.user.name,"images":serialized_images,"colors":serialized_product_colors,"reviews":serialized_reviews}
+        serialized_product={"product_id":product._id,"name":product.name,"brand":product.brand,"category_id":product.category.id,"category":product.category.category,"description":product.description,"rating":product.rating,"num_reviews":product.numReviews,"createdAt":product.createdAt,"user_id":product.user.id,"user_name":product.user.name,"images":serialized_images,"colors":serialized_product_colors}
         return Response(serialized_product)
     except:
         return Response({})
@@ -319,60 +298,6 @@ def uploadImage(request):
     else:
         return Response("Authorization Token not provided")
 
-
-@api_view(['POST'])
-def createProductReview(request, pk):
-    if 'Authorization' in request.headers:
-        token=request.headers['Authorization']
-        if not token:
-            raise AuthenticationFailed('Unauthenticated!')
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed('Token has Expired!')
-        except jwt.InvalidSignatureError:
-            raise AuthenticationFailed("Invalid Token")
-        except:
-            raise AuthenticationFailed("Something went wrong")
-        user = Users.objects.filter(id=payload['id']).first()
-        
-        product = Product.objects.get(_id=pk)
-        data = request.data
-
-        # 1 - Review already exists
-        alreadyExists = product.review_set.filter(user=user).exists()
-        if alreadyExists:
-            content = {'detail': 'Product already reviewed'}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-        # 2 - No Rating or 0
-        elif data['rating'] == 0:
-            content = {'detail': 'Please select a rating'}
-            return Response(content, status=status.HTTP_400_BAD_REQUEST)
-
-        # 3 - Create review
-        else:
-            Review.objects.create(
-                user=user,
-                product=product,
-                name=user.name,
-                rating=data['rating'],
-                comment=data['comment'],
-            )
-
-            reviews = product.review_set.all()
-            product.numReviews = len(reviews)
-
-            total = 0
-            for i in reviews:
-                total += i.rating
-
-            product.rating = total / len(reviews)
-            product.save()
-
-            return Response('Review Added')
-    else:
-        return Response("Authorization Token not provided")
 
 @api_view(["GET"])
 def getProductVariations(request,pk):

@@ -46,6 +46,11 @@ import {
     USER_UPDATE_SUCCESS,
     USER_UPDATE_RESET,
 
+    TABLE_COUNT_REQUEST,
+    TABLE_COUNT_FAIL,
+    TABLE_COUNT_SUCCESS,
+    TABLE_COUNT_RESET,
+
 } from '../constants/userConstants'
 
 export const userLoginReducer= (state={},action)=>{
@@ -252,6 +257,27 @@ export const userUpdateReducer = (state = { user: {} }, action) => {
 
         case USER_UPDATE_RESET:
             return { user: {} }
+
+        default:
+            return state
+    }
+}
+
+export const tableCountReducer = (state = {count:{}}, action) => {
+    switch (action.type) {
+        case TABLE_COUNT_REQUEST:
+            return { loading: true }
+
+        case TABLE_COUNT_SUCCESS:
+            return { loading: false, count: action.payload }
+
+        case TABLE_COUNT_FAIL:
+            return { loading: false, error: action.payload }
+
+        case TABLE_COUNT_RESET:
+            return {
+                count:{}
+            }
 
         default:
             return state
